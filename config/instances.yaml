@@ -64,7 +64,7 @@ containers:
         tls: true
         tls_termination: Edge
 virtualmachines:
-  - name: "node02"
+  - name: "webserver"
     image: "rhel-8.7"
     memory: "4g"
     cores: 2
