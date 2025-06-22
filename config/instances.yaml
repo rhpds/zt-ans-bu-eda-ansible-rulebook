@@ -17,9 +17,9 @@ containers:
       KAFKA_BROKER_ID: "1"
     volumeMounts:
        - name: kafka-varlog
-         mountPath: /var/log/kafka/
+         mountPath: /var/lib/kafka/
     volumes:
-      - name: kafka-varlog
+      - name: kafka-varlib
         emptyDir: {}
     memory: 4Gi
     services:
