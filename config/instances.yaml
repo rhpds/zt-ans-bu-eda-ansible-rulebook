@@ -57,34 +57,34 @@ containers:
 
 virtualmachines:
  - name: "webserver"
-    image: "rhel-9.5"
-    memory: "2G"
-    cores: 2
-    image_size: "30Gi"
-    tags:
-      - key: "AnsibleGroup"
-        value: "isolated"
-    networks:
-      - default
-    services:
-      - name: webserver-http
-        ports:
-          - port: 80
-            protocol: TCP
-            targetPort: 80
-            name: webserver
-    routes:
-      - name: webserver-web
-        host: webserver
-        service: webserver-http
-        targetPort: 80
-        tls: true
-        tls_termination: Edge
-    userdata: |-
-      #cloud-config
-      user: rhel
-      password: ansible123!
-      chpasswd: { expire: False }
-      runcmd:
-        - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf
-        - systemctl reload sshd
+   image: "rhel-9.5"
+   memory: "2G"
+   cores: 2
+   image_size: "30Gi"
+   tags:
+     - key: "AnsibleGroup"
+       value: "isolated"
+   networks:
+     - default
+   services:
+     - name: webserver-http
+       ports:
+         - port: 80
+           protocol: TCP
+           targetPort: 80
+           name: webserver
+   routes:
+     - name: webserver-web
+       host: webserver
+       service: webserver-http
+       targetPort: 80
+       tls: true
+       tls_termination: Edge
+   userdata: |-
+     #cloud-config
+     user: rhel
+     password: ansible123!
+     chpasswd: { expire: False }
+     runcmd:
+       - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf
+       - systemctl reload sshd
