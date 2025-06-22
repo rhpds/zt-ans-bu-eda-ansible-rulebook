@@ -16,7 +16,7 @@ containers:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092
       KAFKA_BROKER_ID: "1"
     volumeMounts:
-       - name: kafka-varlog
+       - name: kafka-varlib
          mountPath: /var/lib/kafka/
     volumes:
       - name: kafka-varlib
