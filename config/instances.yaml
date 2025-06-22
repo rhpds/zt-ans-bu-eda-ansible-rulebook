@@ -68,16 +68,16 @@ virtualmachines:
     networks:
       - default
     services:
-      - name: node03-http
+      - name: webserver-http
         ports:
           - port: 80
             protocol: TCP
             targetPort: 80
-            name: node03
+            name: webserver
     routes:
-      - name: node03-web
-        host: node03
-        service: node03-http
+      - name: webserver-web
+        host: webserver
+        service: webserver-http
         targetPort: 80
         tls: true
         tls_termination: Edge
