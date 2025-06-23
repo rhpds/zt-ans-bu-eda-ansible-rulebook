@@ -18,9 +18,12 @@ containers:
     volumeMounts:
        - name: kafka-varlib
          mountPath: /var/lib/kafka/data
-       
+       - name: kafka-varlog
+         mountPath: /var/log/kafka/
     volumes:
       - name: kafka-varlib
+        emptyDir: {}
+      - name: kafka-varlog
         emptyDir: {}
     memory: 4Gi
     services:
