@@ -1,253 +1,138 @@
-= Infrastructure Data Gathering with Ansible
+= Getting Started: Kafka Example
+
 :toc:
-:toc-placement: auto
+:toclevels: 3
+:numbered:
+:icons: font
 
-== Introduction
+== Overview
 
-Gathering comprehensive data about your infrastructure is one of the best starting points for automation with Ansible. While you know you have servers and networks, auditing and collecting all system data can be a massive undertaking. Fortunately, Ansible excels at this task and can scale to handle infrastructure of any size.
+This tutorial demonstrates how to use `ansible-rulebook` with a Kafka source to monitor event streams and respond to specific messages. You'll learn how to integrate with existing Kafka infrastructure for event-driven automation.
 
-This lab will guide you through using Ansible to collect system information, generate reports, and perform compliance audits across your infrastructure.
+== Introduction to Kafka Integration
 
-=== Lab Environment Setup
+Kafka allows us to have events in an event stream which we can subscribe to. This capability significantly expands our possibilities and opens the door to monitoring applications or enterprise environments using existing event streams.
 
-==== Access Credentials
+In this example, we will:
 
-[cols="1,1"]
-|===
-| Username | Password
-
-| admin
-| ansible123!
-|===
-
-
-== Lab Exercises
-
-=== Exercise 1: Gathering Server Information
-
-Let's start by collecting detailed system facts from individual servers using Ansible's built-in capabilities.
-
-==== Step 1: Access the Inventory
-
-. Navigate to your lab `aap` tab and login using the credentials above
-. Navigate to *Automation Execution* → *Infrastructure* → *Inventories*
-. Select the *Video Platform Inventory*
-. Click on the *Hosts* tab
-
-This inventory contains the systems we'll be automating. You should see several hosts already configured for you.
-
-.Node Setup View
-image::node01-setup.png[Node Setup Interface]
-
-==== Step 2: Run Ad-hoc Commands
-
-We'll use Ansible Automation Platform's ad-hoc command feature to gather system facts:
-
-. Select the host `node01`
-. Click on *Run command*
-. From the module dropdown list, select the *Setup* module
-. Click *Next*
-
-.Setup Module Selection
-image::setup.png[Setup Module Interface]
-
-==== Step 3: Configure Execution Environment
-
-. Select the *Default execution environment* from the dropdown
-. Click *Next*
-
-==== Step 4: Choose Credentials
-
-. Select the *Application Nodes* credential
-. Click *Next*
-. Click *Finish* to execute the command
-
-==== Step 5: Review System Facts
-
-Once the command executes, you'll see comprehensive system facts displayed. This includes all the information Ansible can automatically gather from the target system.
-
-.System Facts Output
-image::setup-output.png[Setup Output Results]
+* Subscribe to a Kafka topic stream
+* Monitor for specific messages
+* Execute automated responses when conditions are met
 
 [NOTE]
 ====
-The Setup module collects extensive system information including hardware details, network configuration, installed packages, and operating system specifics. This data forms the foundation for infrastructure automation and reporting.
+Event streams provide a powerful foundation for enterprise-scale event-driven automation, allowing integration with existing messaging infrastructure.
 ====
 
-=== Exercise 2: Generating Infrastructure Reports at Scale
+== Kafka Topic Source Configuration
 
-Now let's leverage Ansible's templating capabilities to create dynamic reports based on collected facts and task results.
+In this example, we will use Kafka messages from a topic and respond to specific message content.
 
-==== Understanding Infrastructure Awareness
+=== Step 1: Examine the Kafka Rulebook
 
-Infrastructure awareness is crucial for effective IT operations. Ansible makes this easy by combining fact collection with Jinja templating to generate comprehensive, dynamic reports.
+. **From the editor tab**, inspect the `kafka-example.yml` rulebook and take note of the source plugin configuration.
 
-==== Step 1: Generate Application Server Report
+. **Observe the source configuration** pointing to:
+   * Kafka host: `broker`
+   * Topic: `eda-topic`
 
-. Navigate to *Automation Execution* → *Templates*
-. Execute the *Application Server Report* template
-. When prompted with options, click *All*
+. **Review the rule condition** that looks for messages on the topic matching the text "Ansible is cool"
 
-This template will collect information from all your application servers and generate a comprehensive report.
+=== Step 2: Start the Rulebook Engine
 
-==== Step 2: View the Generated Report
+. **From the ansible-rulebook tab**, start `ansible-rulebook` against the Kafka rulebook:
++
+[source,bash]
+----
+ansible-rulebook --rulebook kafka-example.yml -i inventory.yml --print-events
+----
 
-. Once the template execution completes, navigate to the *Report Server* tab
-. Refresh the page to see the newly generated report
+Now that we have `ansible-rulebook` listening to the Kafka topic, let's proceed to generate test messages.
 
-.Server Report Overview
-image::srv-report.png[Server Report Dashboard]
+=== Step 3: Initialize the Kafka Producer
 
-Notice that the report includes backup information alongside system details, providing a holistic view of your infrastructure status.
+. **From the kafka tab**, start the producer client which will allow you to send messages to the topic:
++
+[source,bash]
+----
+kafka-console-producer --bootstrap-server broker:9092 --topic eda-topic
+----
 
-.Backup Data Integration
-image::backup-data.png[Backup Report Section]
+[IMPORTANT]
+====
+This starts an interactive terminal client. You'll see a `>` prompt where you can type your messages. Press Enter after each message to send it to the topic.
+====
+
+=== Step 4: Test Message Processing
+
+==== Test 1: Non-Matching Message
+
+. **From the kafka tab**, send a message using the client started in the previous step. The following message should **not** trigger a response from `ansible-rulebook`:
++
+[source,json]
+----
+{"message":"Ansible is good"}
+----
+
+. **From the ansible-rulebook tab**, observe that the message has been read from the topic but no action was triggered due to the condition mismatch.
+
+==== Test 2: Matching Message
+
+. **From the kafka tab**, send a message using the running Kafka client that will match the conditions in the active rulebook:
++
+[source,json]
+----
+{"message":"Ansible is cool"}
+----
+
+. **From the ansible-rulebook tab**, observe that:
+   * The message has been read from the topic
+   * The condition was satisfied
+   * The playbook has been executed
+
+=== Step 5: Working with Event Data
+
+Event data is automatically passed to the Ansible playbook, enabling dynamic responses based on message content.
+
+. **Test enhanced message processing** by sending another message that includes additional data:
++
+[source,json]
+----
+{"message":"Ansible is cool", "sender":"YOUR_NAME"}
+----
++
+Replace `YOUR_NAME` with your actual name.
+
+. **Observe the enhanced processing** in the ansible-rulebook output, noting how the additional `sender` field is available to the playbook.
 
 [TIP]
 ====
-You can re-run the report template and select different options to create targeted reports for specific criteria or server subsets.
+In the `say-what.yml` playbook, the variable `ansible_eda.event` is specified, which allows us to reference all the event data passed from the Kafka message. This enables dynamic playbook execution based on message content.
 ====
 
-=== Exercise 3: Compliance Reporting with OpenSCAP
+== Understanding Event Data Flow
 
-Security compliance is a critical requirement for most organizations. Let's generate a compliance report using OpenSCAP integration.
+The event data flow in this Kafka integration works as follows:
 
-==== Background: Why Compliance Reports Matter
+1. **Message Reception**: Kafka messages are received by the ansible-rulebook source plugin
+2. **Condition Evaluation**: The rulebook evaluates each message against defined conditions
+3. **Event Data Passing**: When conditions are met, the entire event payload is passed to the target playbook
+4. **Dynamic Execution**: Playbooks can access event data through the `ansible_eda.event` variable
 
-Information Security teams require regular compliance reports to ensure systems meet organizational and regulatory requirements. Ansible can automate OpenSCAP scans to provide these reports consistently and at scale.
+== Key Concepts
 
-==== Step 1: Generate Compliance Report
+**Event Streams**:: Kafka topics provide continuous streams of events that can be monitored in real-time
 
-Security has specifically requested a compliance report for `Node02`. Let's fulfill this request:
+**Message Filtering**:: Rulebook conditions act as filters to determine which messages trigger actions
 
-. Navigate to *Automation Execution* → *Templates*
-. Execute the *OpenSCAP Report* template
+**Dynamic Playbooks**:: Event data enables playbooks to adapt their behavior based on message content
 
-==== Step 2: Access Compliance Results
-
-. Once the job completes, navigate to the *Compliance Report* tab
-. You'll see the generated compliance report files
-
-.Compliance Report Directory
-image::compliance_report_folder.png[Compliance Report Folder]
-
-==== Step 3: Review Detailed Results
-
-Click on the report file to view the detailed compliance results, including:
-
-- Security control assessments
-- Pass/fail status for each check
-- Remediation recommendations
-- Risk severity levels
-
-.Detailed Compliance Report
-image::compliance_report.png[Compliance Report Details]
-
-== Code Reference
-
-=== OpenSCAP Automation Implementation
-
-Here's the key Ansible code used for automated compliance reporting:
-
-[source,yaml]
-----
-tasks:
-  - name: Check if the system is RHEL 8
-    ansible.builtin.debug:
-      msg: "This playbook is not compatible with {{ inventory_hostname }} (not RHEL 8)"
-    when: ansible_distribution != "RedHat" or ansible_distribution_major_version != "8"
-    failed_when: false
-
-  - name: Run compliance tasks on RHEL 8 systems only
-    when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
-    block:
-      - name: Get our facts straight
-        ansible.builtin.set_fact:
-          _profile: '{{ compliance_profile | replace("pci_dss", "pci-dss") }}'
-          _report_dir: /tmp/oscap-reports
-
-      - name: Ensure OpenSCAP tools are installed
-        ansible.builtin.dnf:
-          name: '{{ openscap_packages }}'
-          state: present
-
-      - name: Configure httpd
-        when: use_httpd | bool
-        block:
-          - name: Install httpd
-            ansible.builtin.dnf:
-              name: httpd
-              state: present
-            notify: Restart httpd
-
-          - name: Override report directory
-            ansible.builtin.set_fact:
-              _report_dir: /var/www/html/oscap-reports
-
-          - name: Gather service facts
-            ansible.builtin.service_facts:
-
-          - name: Enable firewall http service
-            ansible.posix.firewalld:
-              service: http
-              state: enabled
-              immediate: true
-              permanent: true
-            when: "'firewalld.service' in ansible_facts.services"
-
-          - name: Disable httpd welcome page
-            ansible.builtin.file:
-              path: /etc/httpd/conf.d/welcome.conf
-              state: absent
-            notify: Restart httpd
-
-      - name: Create report on Report Server
-        block:
-          - name: Ensure report directory exists
-            ansible.builtin.file:
-              path: '{{ _report_dir }}/{{ _profile }}'
-              state: directory
-              owner: root
-              group: root
-              mode: 0755
-
-          - name: Set report name
-            ansible.builtin.set_fact:
-              _report: '{{ _report_dir }}/{{ _profile }}/report-{{ inventory_hostname }}-{{ ansible_date_time.iso8601 }}.html'
-
-          - name: Generate compliance report
-            ansible.builtin.command: >-
-              oscap xccdf eval --profile {{ _profile }} --report {{ _report }}
-              /usr/share/xml/scap/ssg/content/ssg-rhel{{ ansible_distribution_major_version }}-ds.xml
-            args:
-              creates: '{{ _report }}'
-            register: _oscap
-            failed_when: _oscap.rc not in [0, 2]
-
-          - name: Set report permissions
-            ansible.builtin.file:
-              path: '{{ _report }}'
-              owner: root
-              group: root
-              mode: 0644
-----
-
-== Key Takeaways
-
-You've successfully completed the infrastructure data gathering exercises! You now understand how to:
-
-* ✅ **Collect System Facts**: Use Ansible's Setup module to gather comprehensive system information
-* ✅ **Generate Dynamic Reports**: Leverage Jinja templating to create infrastructure reports at scale  
-* ✅ **Automate Compliance Audits**: Implement OpenSCAP integration for security compliance reporting
-* ✅ **Scale Data Collection**: Apply these techniques across multiple systems simultaneously
+**Enterprise Integration**:: Kafka integration allows leveraging existing messaging infrastructure for automation
 
 == Next Steps
 
-With these foundational skills in infrastructure data gathering, you're ready to:
-
-- Implement regular automated reporting schedules
-- Expand compliance scanning to additional security frameworks
-- Create custom reports tailored to your organization's specific needs
-- Build more complex automation workflows using the collected system data
-
-This infrastructure awareness foundation will serve as the basis for more advanced automation scenarios throughout your Ansible journey.
+* Explore more complex Kafka message filtering conditions
+* Integrate with multiple Kafka topics using different source configurations
+* Develop playbooks that process various event data fields
+* Implement error handling and message acknowledgment patterns
+* Scale to production Kafka clusters with authentication and SSL
