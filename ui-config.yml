@@ -15,8 +15,8 @@ antora:
       solveButton: false
 
 tabs:
-  # - name: ">_ ansible-rulebook"
-  #   url: /wetty_webserver
+  - name: ">_ ansible-rulebook"
+    url: /wetty_webserver
 
   # - name: Cloud (PoC)
   #   url: /cloud
