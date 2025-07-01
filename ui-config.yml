@@ -17,6 +17,8 @@ antora:
 tabs:
   - name: ">_ ansible_rulebook"
     url: /wetty_webserver
+    secondary_name: ">_ terminal"
+    secondary_url: /wetty_webserver
 
   # - name: Cloud (PoC)
   #   url: /cloud
