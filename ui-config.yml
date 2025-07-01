@@ -15,8 +15,8 @@ antora:
       solveButton: false
 
 tabs:
-  - name: VSCode Editor
-    url: https://control-${guid}.${domain}/editor/?folder=/home/rhel/
+  - name: ">_ ansible_rulebook"
+    url: /wetty_webserver
 
   # - name: Cloud (PoC)
   #   url: /cloud
