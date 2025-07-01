@@ -15,30 +15,8 @@ antora:
       solveButton: false
 
 tabs:
-  # - name: aap
-  #   url: https://control-${guid}.${domain}/
-  # - name: gitea
-  #   url: https://gitea-${guid}.${domain}/
-  #   external: false
-  # - name: Report Server
-  #   url: https://node03-${guid}.${domain}/index.html
-  #   external: false
-  # - name: Compliance Report
-  #   url: https://node02-${guid}.${domain}/oscap-reports/ospp/
-  #   external: false
-  # - name: Windows RDP
-  #   url: https://windows-ironrdp-${guid}.${domain}/
-  #   external: false
-  # - name: Windows UI
-  #   url: https://windows-${guid}.${domain}/
-  #   external: false
-  # - name: ">_ control"
-  #   url: /wetty
-  - name: ">_ ansible_rulebook"
-    url: /terminal
-    secondary_name: ">_ kafka
-    secondary_url: /wetty_broker
-  # - name: ">_ node03"
-  #   url: /wetty_node03
+  # - name: ">_ ansible-rulebook"
+  #   url: /wetty_webserver
+
   # - name: Cloud (PoC)
   #   url: /cloud
