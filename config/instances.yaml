@@ -1,7 +1,8 @@
 ---
+# Containers are under development
 containers:
   - name: broker
-    image: quay.io/agonzalezrh/cp-kafka:7.0.1
+    image: confluentinc/cp-kafka:7.0.1
     ports:
       - name: broker
         containerPort: 9092
@@ -15,12 +16,10 @@ containers:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092
       KAFKA_BROKER_ID: "1"
     volumeMounts:
-       - name: kafka-varlib
-         mountPath: /var/lib/kafka/data
        - name: kafka-varlog
          mountPath: /var/log/kafka/
     volumes:
-      - name: kafka-varlib
+      - name: kafka-varlog
         emptyDir: {}
     memory: 4Gi
     services:
@@ -32,7 +31,7 @@ containers:
             name: broker
 
   - name: zookeeper
-    image: quay.io/agonzalezrh/cp-zookeeper:7.0.1
+    image: confluentinc/cp-zookeeper:7.0.1
     ports:
       - name: zookeeper
         containerPort: 2181
@@ -49,12 +48,13 @@ containers:
 
     memory: 4Gi
     services:
-      - name: zookeper
+      - name: zookeeper
         ports:
           - port: 2181
             protocol: TCP
-            targetPort: 9092
-            name: zookeper
+            targetPort: 2181
+            name: zookeeper
+
 virtualmachines:
   - name: "webserver"
     image: "rhel-9.5"
