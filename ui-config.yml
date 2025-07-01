@@ -37,7 +37,7 @@ tabs:
   - name: ">_ ansible_rulebook"
     url: /terminal
     secondary_name: ">_ kafka
-    secondary_url: /wetty_kafka
+    secondary_url: /wetty_broker
   # - name: ">_ node03"
   #   url: /wetty_node03
   # - name: Cloud (PoC)
