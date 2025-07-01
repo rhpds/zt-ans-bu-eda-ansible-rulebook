@@ -1,192 +1,165 @@
-= Windows Patching Report with Ansible
+= URL Check Source Plugin Tutorial
+
 :toc:
-:toc-placement: auto
+:toclevels: 3
+:numbered:
+:icons: font
 
-== Introduction
+== Overview
 
-Generating patch reports is a critical operational task for maintaining system security and compliance. When you don't have direct access to Windows systems, Ansible becomes an invaluable tool for gathering patch information and delivering actionable reports to your Windows administration teams.
+This tutorial demonstrates how to use the URL Check plugin with `ansible-rulebook` to monitor website availability and automatically remediate failures. You'll learn how to implement continuous monitoring and automated recovery for web services.
 
-This lab demonstrates how to use Ansible to scan Windows systems for required patches and generate comprehensive reports that can be easily shared with stakeholders.
+== Introduction to URL Monitoring
 
-=== Lab Environment Setup
+The URL Check plugin provides a straightforward approach to website monitoring. This plugin allows us to poll the status of websites continuously, enabling us to detect and respond to issues automatically as they arise.
 
-==== Access Credentials
+In this example, we will:
 
-[cols="1,1"]
-|===
-| Username | Password
-
-| admin
-| ansible123!
-|===
-
-
-
-== Lab Exercise
-
-=== Exercise 1: Creating a Windows Update Report
-
-We'll create a dynamic patch report using Ansible's templating capabilities and publish it as a web page directly on the Windows host for easy access.
-
-==== Step 1: Access the Windows Update Template
-
-. Navigate to *Automation Execution* → *Templates*
-. Select the *Windows Update Report* template
-
-Before launching the template, we need to configure a survey to allow users to specify which type of updates they want to scan for.
-
-.Windows Update Template
-image::update-template.png[Update Template Interface]
-
-==== Step 2: Configure the Survey
-
-. Navigate to the *Survey* tab
-. Create a new survey question with the following details:
-
-===== Survey Configuration:
-
-* *Question:* `Which update category are you wanting to search for?`
-* *Description:* `Windows Update Category`
-* *Answer variable name:* `update_category`
-* *Answer type:* `Multiple Choice (single select)`
-
-===== Multiple Choice Options:
-
-Add each of the following options (click the + button after entering each option):
-
-* Security Updates
-* Critical Updates  
-* Tools
-* Definition Updates
-* Updates
+* Configure continuous URL monitoring
+* Simulate a website failure scenario
+* Implement automated remediation workflows
+* Observe the complete monitoring and recovery cycle
 
 [NOTE]
 ====
-To add each multiple choice option, fill in the field and then click the + button to add it to the list.
+The URL Check source plugin operates on a simple principle: if the webserver responds with a page, the URL is considered 'up'; if there is no response or error, it's considered 'down'.
 ====
 
-.Survey Configuration
-image::survey.png[Survey Setup Interface]
+== URL Check Configuration
 
-==== Step 3: Enable and Save the Survey
+This example demonstrates monitoring a web service and implementing automated recovery when issues are detected.
 
-. Click *Create survey question* to save your configuration
-. Enable the survey using the toggle at the top of the panel
+=== Step 1: Examine the URL Check Rulebook
 
-.Survey Enablement
-image::survey-enable.png[Survey Enable Toggle]
+. **From the editor tab**, inspect the `url-check-example.yml` rulebook and take note of the source plugin configuration.
 
-==== Step 4: Execute the Patch Scan
+. **Observe the source configuration** which includes:
+   * Target URL for monitoring
+   * Multiple URL support capability
+   * Configurable delay intervals for ongoing checks
 
-. Launch the template
-. From the survey dropdown, select *Security Updates*
-. Wait for the template execution to complete
-
-The Ansible playbook will connect to the Windows server, scan for available security updates, and generate a comprehensive HTML report.
-
-==== Step 5: Review the Generated Report
-
-. Once the template completes, navigate to the *Windows Report* tab
-. Review the outstanding updates that are needed for the system
-
-The report will display all available security updates, including:
-- Update titles and descriptions
-- Knowledge Base (KB) numbers
-- Installation requirements
-- Download sizes
-
-.Windows Update Report
-image::update-report.png[Windows Update Report Results]
+The URL Check source plugin provides continuous monitoring by checking webservers at regular intervals defined by the delay parameter.
 
 [TIP]
 ====
-You can re-run the template with different update categories to generate focused reports for specific types of patches (Critical Updates, Definition Updates, etc.).
+You can configure multiple URLs in a single rulebook and set different delay intervals to customize monitoring frequency based on your requirements.
 ====
 
-=== Exercise 2: Verifying Scheduled Tasks
+=== Step 2: Understanding the Monitoring Logic
 
-Let's verify that our previously scheduled backup tasks are running correctly.
+The monitoring logic works as follows:
 
-==== Step 1: Check Scheduled Job Execution
+* **Up Status**: When the webserver responds with a page, the URL is considered 'up'
+* **Down Status**: When there's no page response or connection failure, it's considered 'down'
+* **Continuous Monitoring**: The plugin will keep checking at configured intervals
+* **Event Generation**: Status changes trigger events that can activate remediation playbooks
 
-. Navigate to *Automation Execution* → *Jobs*
-. Observe that your *Server Backup - VSS/Windows* jobs that were scheduled earlier have been running automatically
+In this example, we will:
 
-==== Step 2: Verify VSS Snapshots
+* Keep `ansible-rulebook` running and checking our webserver
+* Remove the `index.html` page to simulate a failure
+* Trigger automatic remediation when the page becomes unavailable
 
-. Execute the *Check Windows Backups* template
-. Confirm that VSS snapshots are being created successfully
+== Hands-On Testing
 
-.VSS Snapshots Verification
-image::vss-snaps.png[VSS Snapshots Status]
+=== Step 3: Start URL Monitoring
 
-This verification confirms that your automated backup strategy is working correctly alongside your new patch reporting capabilities.
-
-== Code Reference
-
-=== Windows Update Report Implementation
-
-Here's the key Ansible code used for generating Windows patch reports:
-
-[source,yaml]
+. **Navigate to the ansible-rulebook tab** and start the rulebook:
++
+[source,bash]
 ----
-tasks:
-  - name: Create site directory structure
-    ansible.windows.win_file:
-      path: "{{ report_path }}"
-      state: directory
-
-  - name: Show us the updates
-    debug:
-      msg: "{{ update_category }}"
-
-  - name: Check available updates
-    ansible.windows.win_updates:
-      category_names:
-       - "{{ update_category | default(omit) }}"
-      state: searched
-    register: update_result
-
-  - name: Generate HTML report
-    ansible.windows.win_template:
-      src: templates/win_patch_report.html.j2
-      dest: C:\inetpub\wwwroot\index.html
-      force: true
-    notify: restart_iis
-    vars:
-      updates: "{{ update_result.updates }}"
-
-handlers:
-  - name: restart_iis
-    ansible.windows.win_service:
-      name: W3Svc
-      state: restarted
-      start_mode: auto
+ansible-rulebook --rulebook url-check-example.yml -i inventory_web.yml --print-events
 ----
 
-=== Key Components Explained
+[IMPORTANT]
+====
+Note that we are using a different inventory file (`inventory_web.yml`) for this exercise, which contains the webserver configuration.
+====
 
-**Update Scanning:**
-- Uses `ansible.windows.win_updates` module in search mode
-- Filters by specified update categories
-- Registers results for report generation
+=== Step 4: Verify Initial Website Status
 
-**Report Generation:**
-- Leverages Jinja2 templating for dynamic HTML creation
-- Publishes reports directly to IIS web server
-- Provides accessible, shareable format for stakeholders
+. **From the Terminal tab**, perform a curl request to verify the webserver is responding:
++
+[source,bash]
+----
+curl webserver
+----
 
-**Service Management:**
-- Automatically restarts IIS after report publication
-- Ensures web service availability for report access
+. **Observe the response** - you should receive a basic webpage, confirming the service is operational.
 
-== Key Takeaways
+. **Check the ansible-rulebook tab** and observe the monitoring messages showing the page is live and triggering the "all is well" playbook.
 
-Congratulations! You've successfully automated multiple critical IT operations tasks:
+=== Step 5: Simulate a Failure Scenario
 
-* ✅ **Automated Backup Operations**: Implemented XFS backups for Linux and VSS snapshots for Windows
-* ✅ **Infrastructure Data Collection**: Gathered comprehensive system facts and generated dynamic reports
-* ✅ **Security Compliance**: Automated OpenSCAP compliance scanning and reporting
-* ✅ **Patch Management**: Created dynamic Windows update reports with configurable survey options
-* ✅ **Scheduled Automation**: Configured recurring tasks that run without manual intervention
+Now let's create a realistic failure scenario to test our automated remediation:
 
+. **From the Webserver tab**, simulate a website failure by deleting the index.html file:
++
+[source,bash]
+----
+sudo rm /var/www/html/index.html
+----
+
+. **Monitor the ansible-rulebook tab** - after the configured delay period, `ansible-rulebook` will detect the failed state and automatically trigger the remediation playbook.
+
+=== Step 6: Observe Automated Remediation
+
+You should see output similar to the following in the ansible-rulebook tab:
+
+[source,text]
+----
+TASK [debug] *******************************************************************
+ok: [webserver] => {
+    "msg": "Website is down!"
+}
+
+TASK [Replace website] *********************************************************
+changed: [webserver]
+
+PLAY RECAP *********************************************************************
+webserver : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+----
+
+. **Verify recovery** - the remediation playbook will restore the missing index.html file.
+
+. **Continue monitoring** - after remediation, the delayed checks will continue, and the website should return to 'up' status.
+
+== Understanding the Complete Workflow
+
+The complete monitoring and remediation workflow includes:
+
+1. **Continuous Monitoring**: URL Check plugin polls the target URL at regular intervals
+2. **Status Detection**: Plugin detects when the website becomes unavailable
+3. **Event Triggering**: Failure condition triggers the remediation rulebook
+4. **Automated Recovery**: Remediation playbook restores the missing content
+5. **Return to Normal**: Monitoring continues and detects the restored service
+
+== Key Benefits
+
+**Proactive Monitoring**:: Continuous health checks detect issues before users report them
+
+**Automated Response**:: Immediate remediation reduces downtime and manual intervention
+
+**Scalable Solution**:: Multiple URLs can be monitored with a single rulebook configuration
+
+**Simple Implementation**:: Straightforward plugin requiring minimal configuration
+
+**Enterprise Ready**:: Suitable for production monitoring with proper alerting integration
+
+== Advanced Configuration Options
+
+The URL Check plugin supports various configuration options:
+
+* **Multiple URLs**: Monitor several endpoints simultaneously
+* **Custom Delays**: Configure check intervals based on criticality
+* **Response Validation**: Customize what constitutes a successful response
+* **Timeout Settings**: Define connection timeout thresholds
+
+== Next Steps
+
+* Configure monitoring for multiple critical URLs
+* Implement escalation procedures for repeated failures
+* Integrate with alerting systems for notification workflows
+* Develop more sophisticated remediation playbooks
+* Add logging and metrics collection for monitoring analytics
+* Explore integration with load balancers and health check systems
