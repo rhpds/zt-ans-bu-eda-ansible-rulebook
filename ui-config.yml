@@ -34,10 +34,10 @@ tabs:
   #   external: false
   # - name: ">_ control"
   #   url: /wetty
-  - name: ">_ webserver"
-    url: /wetty_webserver
   - name: ">_ ansible_rulebook"
-    url: /wetty_node01
+    url: /terminal
+    secondary_name: ">_ kafka
+    secondary_url: /wetty_kafka
   # - name: ">_ node03"
   #   url: /wetty_node03
   # - name: Cloud (PoC)
