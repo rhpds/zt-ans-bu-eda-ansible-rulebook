@@ -1,5 +1,4 @@
 ---
-# Containers are under development
 containers:
   - name: broker
     image: quay.io/agonzalezrh/cp-kafka:7.0.1
@@ -23,8 +22,6 @@ containers:
     volumes:
       - name: kafka-varlib
         emptyDir: {}
-      - name: kafka-varlog
-        emptyDir: {}
     memory: 4Gi
     services:
       - name: broker
@@ -33,7 +30,6 @@ containers:
             protocol: TCP
             targetPort: 9092
             name: broker
-
 
   - name: zookeeper
     image: quay.io/agonzalezrh/cp-zookeeper:7.0.1
@@ -50,11 +46,12 @@ containers:
     volumes:
       - name: kafka-varlog
         emptyDir: {}
+
     memory: 4Gi
     services:
       - name: zookeper
         ports:
-          - port: 9092
+          - port: 2181
             protocol: TCP
             targetPort: 9092
             name: zookeper
@@ -69,25 +66,11 @@ virtualmachines:
         value: "isolated"
     networks:
       - default
-    services:
-      - name: webserver-http
-        ports:
-          - port: 80
-            protocol: TCP
-            targetPort: 80
-            name: webserver
-    routes:
-      - name: webserver-web
-        host: webserver
-        service: webserver-http
-        targetPort: 80
-        tls: true
-        tls_termination: Edge
     userdata: |-
       #cloud-config
       user: rhel
       password: ansible123!
-      chpasswd: { expire: False }
+      chpasswd: { expire: False }  
       runcmd:
         - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf
         - systemctl reload sshd

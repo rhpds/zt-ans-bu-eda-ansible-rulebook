@@ -1,165 +1,162 @@
-= Ansible Automation Platform Lab Guide
+= Ansible Rulebook Basics and Webhook Source Tutorial
+
 :toc:
-:toc-placement: auto
+:toclevels: 3
+:numbered:
+:icons: font
 
-== Welcome to the Team!
+== Overview
 
-Congratulations on joining the team! This lab will introduce you to automation using Ansible Automation Platform. We'll start with read-only tasks that are safe to automate, helping you build confidence before moving to more complex automation scenarios.
+This guide introduces the fundamentals of `ansible-rulebook` and demonstrates how to work with webhook sources. You'll learn about the core components that enable event-driven automation and get hands-on experience with a practical webhook example.
 
-=== Lab Environment Setup
+== Rulebook Fundamentals
 
-==== Access Credentials
+`ansible-rulebook` relies on three essential components that work together to enable event-driven automation and intelligent responses to system events.
 
-[cols="1,1"]
-|===
-| Username | Password
+=== Core Components
 
-| admin
-| ansible123!
-|===
+The three main components of rulebooks are:
 
+**Source**:: The sources of our events come from source plugins. These plugins define where we are listening for events and monitoring system activity.
 
+**Condition**:: The conditional statements in the rulebook allow us to match specific criteria on which we want to trigger a response. These act as filters to determine when actions should be executed.
 
-== Lab Exercises
-
-=== Exercise 1: Backing up Linux File Systems
-
-Managing backups across multiple Linux servers is a common operational task. Ansible can automate various snapshot mechanisms whether your infrastructure is cloud-based, virtualized, or bare metal.
-
-==== Step 1: Check Current Backup Status
-
-. Navigate to the `aap` tab and login using the credentials above (`admin/ansible123!`)
-. Click on the Menu dropdown icon (hamburger menu)
-. Navigate to *Automation Execution* → *Templates*
-. Launch the template *Check RHEL Backups* by clicking the 🚀 icon
-
-You should see that no backups are currently available.
-
-.Current Backup Status
-image::/backupcheck.png[Backup Check Results]
-
-==== Step 2: Create XFS Backups
-
-Now let's create backups of the XFS file systems on your RHEL servers:
-
-. Navigate back to *Automation Execution* → *Templates*
-. Launch the *Server Backup - XFS/RHEL* template
-. This process will backup your three RHEL nodes using XFS dumps
+**Action**:: The action is our response once the condition has been met from the event source. This can include triggering remediation workflows, logging tickets for observation, or generating additional events for further processing.
 
 [NOTE]
 ====
-This backup process takes approximately 6-7 minutes. Feel free to proceed with other tasks while it runs - Ansible jobs can run in parallel safely!
+The list of available source plugins is actively expanding as more partners contribute to the project ecosystem.
 ====
 
-.XFS Backup Process
-image::xfsbackup.png[XFS Backup in Progress]
+image::/rulebook.png[Rulebook Architecture,border=black]
 
-==== Step 3: Verify Backup Creation
+=== Available Source Plugins
 
-Once the backup completes:
+The following table shows the currently supported source plugins:
 
-. Launch the *Check RHEL Backups* template again
-. Verify that backups are now available on each server
+[cols="2,4",options="header"]
+|===
+| Source Plugin | Description
 
-.Backup Verification
-image::afterbackupcheck.png[Backup Check After Creation]
+| Azure Service Bus
+| An ansible-rulebook event source module for receiving events from an Azure service bus
 
-=== Exercise 2: Windows System Snapshots
+| File
+| An ansible-rulebook event source plugin for loading facts from YAML files initially and when the file changes
 
-Windows systems have built-in Volume Shadow Copy Service (VSS) snapshotting capabilities. While your organization may use third-party backup tools, VSS snapshots are essential for database systems as they allow backups without locking active files.
+| Kafka
+| An ansible-rulebook event source plugin for receiving events via a kafka topic
 
-==== Step 1: Create VSS Snapshots
+| Range
+| An ansible-rulebook event source plugin for generating events with an increasing index
 
-. Navigate to *Automation Execution* → *Templates*
-. Launch the *Server Snapshot - VSS/Windows* template
+| URL Check
+| An ansible-rulebook event source plugin that polls a set of URLs and sends events with their status
 
-.Windows VSS Snapshot
-image::vss-snap.png[Windows VSS Snapshot Creation]
+| Webhook
+| An ansible-rulebook event source module for receiving events via a webhook
 
-==== Step 2: Verify Snapshot Creation
+| Watchdog
+| An ansible-rulebook event source plugin for watching file system changes
 
-. Navigate to *Automation Execution* → *Templates*
-. Execute the *Check Windows Backups* template
+| Alertmanager
+| An event source module for receiving events via a webhook from Alertmanager
+|===
 
-.VSS Snapshot Verification
-image::vss-snap-check.png[VSS Snapshot Check]
+== Webhook Source Example
 
-Great! The VSS snapshot has been successfully created.
+This section demonstrates how to implement and test a webhook-based rulebook that responds to HTTP POST requests.
 
-==== Step 3: Schedule Automated Snapshots
+=== Step 1: Examine the Rulebook Structure
 
-To automate recurring snapshots without manual intervention:
+. **Navigate to the editor tab** and inspect the sources and rules in `webhook-example.yml`
 
-. Navigate to *Automation Execution* → *Templates*
-. Select *Server Backup - VSS/Windows*
-. Click on the *Schedules* tab
-. Click *Create schedule*
+The example demonstrates all three core components mentioned above:
 
-.Schedule Configuration
-image::win-shed.png[Windows Schedule Setup]
-
-===== Schedule Configuration Details:
-
-* *Schedule Name:* `5 Min Snappy`
-* *Description:* `Automated VSS Snaps`
-* *Start date/time:* Leave as default
-* *Time Zone:* Leave as default
-
-===== Frequency Settings:
-
-. Click *Next*
-. Set *Frequency* to `Minutely`
-. Set *Interval* to `5`
-. Select *Save rule* and click *Next*
-. Skip exceptions (click *Next*)
-. Click *Finish*
-
-.Schedule Details
-image::shed-details.png[Schedule Configuration Details]
-
-Perfect! Your automated snapshot schedule is now configured.
-
-== Code Reference
-
-=== XFS Backup Automation
-
-Here's the key Ansible code used for XFS backups:
-
+**Source Configuration**:: This specifies which source plugin we are using (webhook plugin in this case):
++
 [source,yaml]
 ----
-tasks:
-  - name: Check if xfsdump is installed
-    ansible.builtin.yum:
-      name: xfsdump
-      state: present
-    when: ansible_facts.os_family == "RedHat"
-
-  - name: Ensure the backup directory exists
-    ansible.builtin.file:
-      path: "{{ backup_file | dirname }}"
-      state: directory
-      mode: '0755'
-
-  - name: Perform xfsdump backup
-    ansible.builtin.command:
-      cmd: >
-        xfsdump -l 0 -L {{ backup_label }}
-        -f {{ backup_file }} {{ xfs_mount_point }}
-    register: backup_result
-    ignore_errors: no
-
-  - name: Verify xfsdump success
-    ansible.builtin.debug:
-      msg: "Backup completed successfully: {{ backup_result.stdout }}"
+sources:
+  - ansible.eda.webhook:
+      host: 0.0.0.0
+      port: 5000
 ----
+
+**Rule Definition**:: The rule provides a conditional statement that looks for a specific message:
++
+[source,yaml]
+----
+rules:
+  - name: Say Hello
+    condition: event.payload.message == "Ansible is super cool!"
+----
+
+**Action Specification**:: The action defines what happens when the rule condition is met:
++
+[source,yaml]
+----
+action:
+  run_playbook:
+    name: say-what.yml
+----
+
+=== Step 2: Review the Triggered Playbook
+
+. **From the editor tab**, inspect the `say-what.yml` playbook to understand what will execute when the condition is met.
+
+=== Step 3: Start the Rulebook Engine
+
+Now let's test the webhook functionality:
+
+. **Run the rulebook** from the `ansible-rulebook` tab:
++
+[source,bash]
+----
+ansible-rulebook --rulebook webhook-example.yml -i inventory.yml --print-events
+----
+
+. **Observe the output** showing the initial rulebook being loaded by `ansible-rulebook`, followed by a flashing cursor indicating it's ready to receive events.
+
+=== Step 4: Test Event Processing
+
+Let's trigger some messages and observe the responses:
+
+==== Test 1: Non-matching Message
+
+. **From the terminal tab**, use `curl` to post a message that won't match our condition:
++
+[source,bash]
+----
+curl -H 'Content-Type: application/json' -d "{\"message\": \"Ansible is alright\"}" 127.0.0.1:5000/endpoint
+----
+
+. **From the ansible-rulebook tab**, observe that the message was received but no action was triggered because it didn't match the rule condition.
+
+==== Test 2: Matching Message
+
+. **From the terminal tab**, use `curl` to post a message that matches our condition:
++
+[source,bash]
+----
+curl -H 'Content-Type: application/json' -d "{\"message\": \"Ansible is super cool!\"}" 127.0.0.1:5000/endpoint
+----
+
+[WARNING]
+====
+Ensure the message text matches exactly, including punctuation and capitalization, as the condition performs an exact string comparison.
+====
+
+== Key Takeaways
+
+* **Event-Driven Architecture**: Ansible rulebooks enable reactive automation based on external events
+* **Flexible Source Plugins**: Multiple input sources allow integration with various systems and protocols  
+* **Conditional Logic**: Rules provide precise control over when actions should be executed
+* **Webhook Integration**: HTTP endpoints enable easy integration with web services and applications
 
 == Next Steps
 
-You've successfully completed the backup automation exercises! You now have:
-
-* ✅ Automated Linux XFS backups
-* ✅ Windows VSS snapshots
-* ✅ Scheduled recurring snapshots
-* ✅ Verification procedures for both systems
-
-This foundation in read-only automation tasks will help you build confidence for more complex automation scenarios in the future.
+* Explore additional source plugins for your specific use cases
+* Create custom conditions with more complex logic
+* Develop multi-step playbooks for comprehensive automation workflows
+* Integrate with monitoring and alerting systems using the Alertmanager source plugin
