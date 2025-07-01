@@ -30,7 +30,7 @@ containers:
             targetPort: 9092
             name: broker
     commands:
-      - kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --topic eda-topic --partitions 3 --replication-factor 1
+      - kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --topic eda-topic --partitions 3 --replication-factor 1
 
 
   - name: zookeeper
