@@ -20,7 +20,7 @@ tabs:
     secondary_name: ">_ terminal"
     secondary_url: /wetty_webserver
   - name: ">_ kafka"
-    url: /wetty_broker
+    url: /terminal
 
   # - name: Cloud (PoC)
   #   url: /cloud
