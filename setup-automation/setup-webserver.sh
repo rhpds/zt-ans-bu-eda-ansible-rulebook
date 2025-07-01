@@ -9,6 +9,8 @@ subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE
 
 dnf install httpd nano python3-pip java-21-openjdk.x86_64 ansible-core -y
 pip install ansible-rulebook
+pip install aiokafka
+
 ansible-galaxy collection install ansible.eda
 
 tee /home/rhel/kafka-example.yml << EOF
