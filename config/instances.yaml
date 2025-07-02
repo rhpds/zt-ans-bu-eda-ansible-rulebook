@@ -74,3 +74,17 @@ virtualmachines:
       runcmd:
         - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf
         - systemctl reload sshd
+    services:
+      - name: webserver-http
+        ports:
+          - port: 80
+            protocol: TCP
+            targetPort: 80
+            name: webserver
+    routes:
+      - name: webserver-web
+        host: webserver
+        service: webserver-http
+        targetPort: 80
+        tls: true
+        tls_termination: Edge
