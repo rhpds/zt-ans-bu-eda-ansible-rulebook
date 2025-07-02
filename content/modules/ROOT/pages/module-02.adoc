@@ -51,7 +51,14 @@ Now that we have `ansible-rulebook` listening to the Kafka topic, let's proceed 
 
 === Step 3: Initialize the Kafka Producer
 
-. **From the kafka tab**, start the producer client which will allow you to send messages to the topic:
+. **From the kafka tab**, we need to connect to our Kafka container and start the producer client which will allow you to send messages to the topic:
+
++
+[source,bash]
+----
+ oc rsh broker
+----
+
 +
 [source,bash]
 ----
