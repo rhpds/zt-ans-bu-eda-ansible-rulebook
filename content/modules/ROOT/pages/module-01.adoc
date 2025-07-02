@@ -69,7 +69,12 @@ This section demonstrates how to implement and test a webhook-based rulebook tha
 
 === Step 1: Examine the Rulebook Structure
 
-. **Navigate to the editor tab** and inspect the sources and rules in `webhook-example.yml`
+. **Navigate to the ansible-rulebook tab** and inspect the sources and rules in `webhook-example.yml`
+
+[source,yaml]
+----
+cat webhook-example.yml
+----
 
 The example demonstrates all three core components mentioned above:
 
@@ -89,7 +94,7 @@ sources:
 ----
 rules:
   - name: Say Hello
-    condition: event.payload.message == "Ansible is super cool!"
+    condition: event.body.message == "Ansible is super cool!"
 ----
 
 **Action Specification**:: The action defines what happens when the rule condition is met:
@@ -103,7 +108,12 @@ action:
 
 === Step 2: Review the Triggered Playbook
 
-. **From the editor tab**, inspect the `say-what.yml` playbook to understand what will execute when the condition is met.
+. **From the ansible-rulebook**, inspect the `say-what.yml` playbook to understand what will execute when the condition is met.
+
+[source,yaml]
+----
+cat say-what.yml
+----
 
 === Step 3: Start the Rulebook Engine
 
