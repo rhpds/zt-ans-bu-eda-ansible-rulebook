@@ -30,7 +30,7 @@ In this example, we will use Kafka messages from a topic and respond to specific
 
 === Step 1: Examine the Kafka Rulebook
 
-. **From the editor tab**, inspect the `kafka-example.yml` rulebook and take note of the source plugin configuration.
+. **From the ansible-rulebook tab**, inspect the `kafka-example.yml` rulebook and take note of the source plugin configuration.
 
 . **Observe the source configuration** pointing to:
    * Kafka host: `broker`
