@@ -82,7 +82,7 @@ Note that we are using a different inventory file (`inventory_web.yml`) for this
 +
 [source,bash]
 ----
-curl webserver
+curl localhost
 ----
 
 . **Observe the response** - you should receive a basic webpage, confirming the service is operational.
