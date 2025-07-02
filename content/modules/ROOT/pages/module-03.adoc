@@ -31,7 +31,7 @@ This example demonstrates monitoring a web service and implementing automated re
 
 === Step 1: Examine the URL Check Rulebook
 
-. **From the editor tab**, inspect the `url-check-example.yml` rulebook and take note of the source plugin configuration.
+. **From the ansible-rulebook tab**, inspect the `url-check-example.yml` rulebook and take note of the source plugin configuration.
 
 . **Observe the source configuration** which includes:
    * Target URL for monitoring
