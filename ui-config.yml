@@ -19,6 +19,9 @@ tabs:
     url: /wetty_webserver
     secondary_name: ">_ terminal"
     secondary_url: /wetty_webserver
+  - name: ">_ kafka"
+    url: /terminal
+
 
   # - name: Cloud (PoC)
   #   url: /cloud
