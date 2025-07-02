@@ -39,7 +39,7 @@ tee /home/rhel/kafka-example.yml << EOF
   ## Define the conditions we are looking for
   rules:
     - name: Say Hello
-      condition: event.message == "Ansible is cool"
+      condition: event.body.message == "Ansible is cool"
       ## Define the action we should take should the condition be met
       action:
         run_playbook:
