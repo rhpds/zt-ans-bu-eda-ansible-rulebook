@@ -96,8 +96,7 @@ tee /home/rhel/webhook-example.yml << EOF
 EOF
 
 tee /home/rhel/inventory << EOF
-[webserver]
-localhost ansible_connection=local
+localhost
 
 EOF
 
@@ -173,6 +172,9 @@ web:
     webserver:
       ansible_user: rhel
       ansible_password: ansible123!
+      ansible_connection: local
+      ansible_host: localhost
+      
 EOF
 #
 
