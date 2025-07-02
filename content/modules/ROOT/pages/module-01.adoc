@@ -67,6 +67,14 @@ The following table shows the currently supported source plugins:
 
 This section demonstrates how to implement and test a webhook-based rulebook that responds to HTTP POST requests.
 
+To begin, lets install the ansible.eda collection to access the source plugins:
+
+[source,yaml]
+----
+ansible-galaxy collection install ansible.eda
+----
+
+
 === Step 1: Examine the Rulebook Structure
 
 . **Navigate to the ansible-rulebook tab** and inspect the sources and rules in `webhook-example.yml`
@@ -94,7 +102,7 @@ sources:
 ----
 rules:
   - name: Say Hello
-    condition: event.body.message == "Ansible is super cool!"
+    condition: event.body.message == "Ansible is super cool"
 ----
 
 **Action Specification**:: The action defines what happens when the rule condition is met:
@@ -149,7 +157,7 @@ curl -H 'Content-Type: application/json' -d "{\"message\": \"Ansible is alright\
 +
 [source,bash]
 ----
-curl -H 'Content-Type: application/json' -d "{\"message\": \"Ansible is super cool!\"}" 127.0.0.1:5000/endpoint
+curl -H 'Content-Type: application/json' -d "{\"message\": \"Ansible is super cool\"}" 127.0.0.1:5000/endpoint
 ----
 
 [WARNING]
