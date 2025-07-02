@@ -93,7 +93,7 @@ curl localhost
 
 Now let's create a realistic failure scenario to test our automated remediation:
 
-. **From the Webserver tab**, simulate a website failure by deleting the index.html file:
+. **From the terminal tab**, simulate a website failure by deleting the index.html file:
 +
 [source,bash]
 ----
