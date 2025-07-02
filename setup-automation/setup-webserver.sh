@@ -95,8 +95,9 @@ tee /home/rhel/webhook-example.yml << EOF
           name: say-what.yml
 EOF
 
-tee /home/rhel/inventory.yml << EOF
-localhost
+tee /home/rhel/inventory << EOF
+[webserver]
+localhost ansible_connection=local
 
 EOF
 
@@ -143,7 +144,7 @@ EOF
 tee /home/rhel/fix_web.yml << EOF
 ---
 - name: Site Down
-  hosts: all
+  hosts: webserver
   gather_facts: false
   become: true
   
@@ -211,6 +212,33 @@ cat <<EOF | tee /var/www/html/index.html
 EOF
 
 systemctl start httpd
+
+tee /var/www/html/index.html << EOF
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Sample Page for EDA</h1>
+<p>This is a basic page - WOOO HOOOOO!</p>
+
+</body>
+</html>
+
+EOF
+
+tee /tmp/index.html << EOF
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Sample Page for EDA</h1>
+<p>This is a basic page - WOOO HOOOOO!</p>
+
+</body>
+</html>
+
+EOF
+
 
 mkdir /backup
 chmod -R 777 /backup
