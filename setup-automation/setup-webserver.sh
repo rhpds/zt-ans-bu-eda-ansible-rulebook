@@ -13,10 +13,13 @@ pip install aiokafka
 
 ansible-galaxy collection install ansible.eda
 wget https://dlcdn.apache.org/kafka/3.9.1/kafka_2.12-3.9.1.tgz -O /tmp/kafka_2.12-3.9.1.tgz
-echo "Creating /tmp/kafka directory..."
+
 mkdir -p /tmp/kafka
+
 tar -xzf /tmp/kafka_2.12-3.9.1.tgz -C /tmp/kafka --strip-components=1
+
 sudo cp /tmp/kafka/bin/* /usr/local/bin/
+
 sudo chmod +x /usr/local/bin/kafka-*
 sudo chmod +x /usr/local/bin/connect-*
 sudo chmod +x /usr/local/bin/trogdor.sh
