@@ -119,7 +119,7 @@ tee /home/rhel/url-check-example.yml << EOF
   sources:
      - ansible.eda.url_check:
         urls:
-          - http://webserver
+          - http://localhost
         delay: 10
 
   rules:
