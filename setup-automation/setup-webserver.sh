@@ -73,7 +73,7 @@ tee /home/rhel/say-what.yml << EOF
   gather_facts: false
   tasks:
     - debug:
-        msg: "Thank you, {{ ansible_eda.event.sender | default('my friend') }}!"
+        msg: "Thank you, {{ ansible_eda.event.body.sender | default('my friend') }}!"
 EOF
 
 tee /home/rhel/webhook-example.yml << EOF
@@ -117,7 +117,7 @@ tee /home/rhel/url-check-example.yml << EOF
   hosts: web
   ## Define our source for events
   sources:
-     - ansible.eda.url_check:
+    - ansible.eda.url_check:
         urls:
           - http://localhost
         delay: 10

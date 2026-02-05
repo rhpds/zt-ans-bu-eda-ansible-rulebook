@@ -131,7 +131,7 @@ Now let's test the webhook functionality:
 +
 [source,bash]
 ----
-ansible-rulebook --rulebook webhook-example.yml -i inventory.yml --print-events
+ansible-rulebook --rulebook webhook-example.yml -i inventory --print-events
 ----
 
 . **Observe the output** showing the initial rulebook being loaded by `ansible-rulebook`, followed by a flashing cursor indicating it's ready to receive events.
