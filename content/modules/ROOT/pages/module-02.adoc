@@ -44,7 +44,7 @@ In this example, we will use Kafka messages from a topic and respond to specific
 +
 [source,bash]
 ----
-ansible-rulebook --rulebook kafka-example.yml -i inventory.yml --print-events
+ansible-rulebook --rulebook kafka-example.yml -i inventory --print-events
 ----
 
 Now that we have `ansible-rulebook` listening to the Kafka topic, let's proceed to generate test messages.
