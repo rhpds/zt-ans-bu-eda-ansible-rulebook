@@ -10,6 +10,7 @@ subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE
 dnf install httpd nano python3-pip java-21-openjdk.x86_64 ansible-core wget -y
 pip install ansible-rulebook
 pip install aiokafka
+pip install fastavro
 
 ansible-galaxy collection install ansible.eda
 wget https://dlcdn.apache.org/kafka/3.9.1/kafka_2.12-3.9.1.tgz -O /tmp/kafka_2.12-3.9.1.tgz
