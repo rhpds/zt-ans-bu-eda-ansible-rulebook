@@ -73,8 +73,9 @@ tee /home/rhel/say-what.yml << EOF
   hosts: localhost
   gather_facts: false
   tasks:
-    - debug:
-        msg: "Thank you, {{ ansible_eda.event.sender | default('my friend') }}!"
+   - debug:
+      msg: "Thank you, {{ ansible_eda.event.body.sender | default('my friend') }}!"
+
 EOF
 
 tee /home/rhel/webhook-example.yml << EOF
