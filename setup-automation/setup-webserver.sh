@@ -12,7 +12,9 @@ pip install ansible-rulebook
 pip install aiokafka
 pip install fastavro
 
-ansible-galaxy collection install ansible.eda
+mkdir -p /home/rhel/.ansible/collections
+ansible-galaxy collection install ansible.eda -p /home/rhel/.ansible/collections
+chown -R rhel:rhel /home/rhel/.ansible
 wget https://dlcdn.apache.org/kafka/3.9.1/kafka_2.12-3.9.1.tgz -O /tmp/kafka_2.12-3.9.1.tgz
 
 mkdir -p /tmp/kafka
@@ -214,7 +216,7 @@ cat <<EOF | tee /var/www/html/index.html
 
 EOF
 
-systemctl start httpd
+systemctl enable --now httpd
 
 tee /var/www/html/index.html << EOF
 <!DOCTYPE html>
