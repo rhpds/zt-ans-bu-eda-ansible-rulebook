@@ -102,7 +102,7 @@ sources:
 ----
 rules:
   - name: Say Hello
-    condition: event.body.message == "Ansible is super cool"
+    condition: event.payload.message == "Ansible is super cool"
 ----
 
 **Action Specification**:: The action defines what happens when the rule condition is met:
