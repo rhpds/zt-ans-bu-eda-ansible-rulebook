@@ -15,11 +15,11 @@ pip install fastavro
 mkdir -p /home/rhel/.ansible/collections
 ansible-galaxy collection install ansible.eda -p /home/rhel/.ansible/collections
 chown -R rhel:rhel /home/rhel/.ansible
-wget https://dlcdn.apache.org/kafka/3.9.1/kafka_2.12-3.9.1.tgz -O /tmp/kafka_2.12-3.9.1.tgz
+wget https://archive.apache.org/dist/kafka/3.9.0/kafka_2.12-3.9.0.tgz -O /tmp/kafka.tgz
 
 mkdir -p /tmp/kafka
 
-tar -xzf /tmp/kafka_2.12-3.9.1.tgz -C /tmp/kafka --strip-components=1
+tar -xzf /tmp/kafka.tgz -C /tmp/kafka --strip-components=1
 
 sudo cp /tmp/kafka/bin/* /usr/local/bin/
 
