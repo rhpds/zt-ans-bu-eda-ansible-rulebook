@@ -216,7 +216,7 @@ cat <<EOF | tee /var/www/html/index.html
 
 EOF
 
-systemctl start httpd
+systemctl enable --now httpd
 
 tee /var/www/html/index.html << EOF
 <!DOCTYPE html>
